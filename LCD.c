@@ -42,125 +42,170 @@
 #define Bl 0b00001000
 #define En 0b00000100  // Enable bit
 #define Rw 0b00000010  // Read/Write bit
-//#define Rs 0b00000001  // Register select bit
+#define Rs 0b00000001  // Register select bit
 
 #define LCD 0x3F
-void LCDWrite(uint8_t date, uint8_t Rs)
+void LCDWrite(uint8_t date, uint8_t type)
 {	
 	uint8_t data2=date;
 	data2 &= 0xF0;
-	I2C_write(LCD, (data2) | Bl | Rs |  En);
-	I2C_write(LCD, (data2)| Bl | Rs);
-	I2C_write(LCD, (date << 4) | Bl | Rs |  En);
-	I2C_write(LCD, (date << 4)| Bl | Rs);
+	I2CWrite(LCD, (data2) | Bl | (type ? Rs : 0) |  En);
+	I2CWrite(LCD, (data2)| Bl | (type ? Rs : 0));
+	I2CWrite(LCD, (date << 4) | Bl | (type ? Rs : 0) |  En);
+	I2CWrite(LCD, (date << 4)| Bl | (type ? Rs : 0));
+
 }
 
 void LCDFirstRow()
 {
 	LCDWrite(0b10000000,0);
+	delay_mc(1);
 }
 void LCDSecondRow()
 {
 	LCDWrite(0b11000000,0);
+	delay_mc(1);
 }
 
 
 
 
-// 0b	0		0		0		0		0		0		0		0						0b	0		0		0		0		0		0		0		0
+// 0b	0		0		0		0		0		0		0		0				0b	0		0		0		0		0		0		0		0
 //		DB7	DB6	DB5	DB4	BL	E		R/W	RS					DB3	DB2	DB1	DB0	BL	E		R/W	RS
 void LCDInit() 
 {
-	I2C_write(0x3F, 0b00000000);
+	I2CWrite(0x3F, 0b00000000);
 
 	for (int i = 0; i<419400; i++)
 	{}
-	I2C_write(0x3F, 0b00000000);	
+	I2CWrite(0x3F, 0b00000000);	
 	
-	I2C_write(0x3F, 0b00110100);
-	I2C_write(0x3F, 0b00110000);
+	I2CWrite(0x3F, 0b00110100);
+	I2CWrite(0x3F, 0b00110000);
 		
 	for (int i = 0; i<19250; i++)
 	{}	
 	;
-	I2C_write(0x3F, 0b00110100);
-	I2C_write(0x3F, 0b00110000);
+	I2CWrite(0x3F, 0b00110100);
+	I2CWrite(0x3F, 0b00110000);
 		
 	for (int i = 0; i<19250; i++)
 	{}		
 	
-	I2C_write(0x3F, 0b00110100);
-	I2C_write(0x3F, 0b00110000);
+	I2CWrite(0x3F, 0b00110100);
+	I2CWrite(0x3F, 0b00110000);
 
 	for (int i = 0; i<9017; i++)
 	{}
 	
-	I2C_write(0x3F, 0b00100100);
-	I2C_write(0x3F, 0b00100000);
+	I2CWrite(0x3F, 0b00100100);
+	I2CWrite(0x3F, 0b00100000);
 		
-	I2C_write(0x3F, 0b00100000);
-	I2C_write(0x3F, 0b00100100);
-	I2C_write(0x3F, 0b00100000);
+	I2CWrite(0x3F, 0b00100000);
+	I2CWrite(0x3F, 0b00100100);
+	I2CWrite(0x3F, 0b00100000);
 
 	
-	I2C_write(0x3F, 0b10000100);
-	I2C_write(0x3F, 0b10000000);
+	I2CWrite(0x3F, 0b10000100);
+	I2CWrite(0x3F, 0b10000000);
 		
 	
-	I2C_write(0x3F, 0b00000100);
-	I2C_write(0x3F, 0b00000000);
+	I2CWrite(0x3F, 0b00000100);
+	I2CWrite(0x3F, 0b00000000);
 		
 	
-	I2C_write(0x3F, 0b11000100);
-	I2C_write(0x3F, 0b11000000);
+	I2CWrite(0x3F, 0b11000100);
+	I2CWrite(0x3F, 0b11000000);
 	
 	
-	I2C_write(0x3F, 0b00000100);
-	I2C_write(0x3F, 0b00000000);
+	I2CWrite(0x3F, 0b00000100);
+	I2CWrite(0x3F, 0b00000000);
 	
 	
-	I2C_write(0x3F, 0b00010100);
-	I2C_write(0x3F, 0b00010000);
+	I2CWrite(0x3F, 0b00010100);
+	I2CWrite(0x3F, 0b00010000);
 	
 	for (int i = 0; i<8723; i++)
 	{}
 	
-	I2C_write(0x3F, 0b00000100);
-	I2C_write(0x3F, 0b00000000);
+	I2CWrite(0x3F, 0b00000100);
+	I2CWrite(0x3F, 0b00000000);
 
 	
-	I2C_write(0x3F, 0b11000100);
-	I2C_write(0x3F, 0b11000000);
+	I2CWrite(0x3F, 0b11000100);
+	I2CWrite(0x3F, 0b11000000);
 		
 	
-	I2C_write(0x3F, 0b00000100);
-	I2C_write(0x3F, 0b00000000);
+	I2CWrite(0x3F, 0b00000100);
+	I2CWrite(0x3F, 0b00000000);
 	
 	
-	I2C_write(0x3F, 0b00000100);
-	I2C_write(0x3F, 0b00000000);
+	I2CWrite(0x3F, 0b00000100);
+	I2CWrite(0x3F, 0b00000000);
 		
 	for (int i = 0; i<8723; i++)
 	{}	
-	I2C_write(0x3F, 0b00001000);			//koniec inicjalizacji
+	I2CWrite(0x3F, 0b00001000);			//koniec inicjalizacji
 		
-		
+	LCDWrite(0b00001111, 0);
 	LCDFirstRow();
-	LCDWrite(0b01000100,1);				//d
-	LCDWrite(0b01011001,1);				//y
-	LCDWrite(0b01010011,1);				//s
-	LCDWrite(0b01010100,1);				//t	
-	LCDWrite(0b01000001,1);				//a
-	LCDWrite(0b01001110,1);				//n
-	LCDWrite(0b01010011,1);				//s
-	LCDWrite(0b00111010,1);				//:
+	LCDWrite(0b01000100, Rs);				//d
+	LCDWrite(0b01011001, Rs);				//y
+	LCDWrite(0b01010011, Rs);				//s
+	LCDWrite(0b01010100, Rs);				//t	
+	LCDWrite(0b01000001, Rs);				//a
+	LCDWrite(0b01001110, Rs);				//n
+	LCDWrite(0b01010011, Rs);				//s
+	LCDWrite(0b00111010, Rs);				//:
 	LCDSecondRow();
 		
-	for (int i=0;i<15;i++) {
+	for (int i=0;i<16;i++) {
 		LCDWrite(0b11111111,1);
-		delay_mc(100);
+		delay_mc(1);
 	}
 	LCDFirstRow();
 	LCDWrite(0b00000000,0);
 	
+}
+
+void LCDGotoXY(uint8_t x, uint8_t y)
+{
+	LCDGoto00();
+	
+	if(y ==1){LCDSecondRow();}
+	for(int i = 0; i < x; i++)
+	{
+	LCDCoursorRight();
+	//delay_mc(1);
+	}
+}
+
+void LCDGoto00()
+{
+	LCDWrite(0b000000010, 0);
+	delay_mc(1);
+}
+
+void LCDCoursorRight()
+{	
+	LCDWrite(0b00010100, 0);
+	delay_mc(1);
+}
+
+void LCDCoursorLeft()
+{	
+	LCDWrite(0b00010000, 0);
+	delay_mc(1);
+}
+
+void LCDClearXY(uint8_t x, uint8_t y)
+{
+	LCDGotoXY(x, y);
+	LCDWrite(0b00100000, Rs);
+}
+
+void LCDWriteSquare(uint8_t x, uint8_t y)
+{
+	LCDGotoXY(x, y);
+	LCDWrite(0b11111111, Rs);
 }
