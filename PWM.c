@@ -2,7 +2,7 @@
 #include "mkl05z4.h"
 #include "extra.h"
 uint16_t stop = 0;
-void Pwm_Initialize(){
+void PWMInitialize(){
 
 	SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK;		// Clock on PORTB 
 	SIM->SCGC6 |= SIM_SCGC6_TPM0_MASK;		// Clock on TMP0 module 
