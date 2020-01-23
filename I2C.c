@@ -18,7 +18,7 @@ void I2CInit (void)
 	return;
 }
 
-void I2C_write(uint8_t address, uint8_t data){
+void I2CWrite(uint8_t address, uint8_t data){
 	I2C0->C1 |= I2C_C1_IICEN_MASK;
 	I2C_TRAN;						//set to transmit mode 
 	I2C_M_START;				//send start
