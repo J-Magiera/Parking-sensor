@@ -1,14 +1,16 @@
-//#include "MK20D5.h"
 #include "mkl05z4.h"
+#include "PWM.h"
 #include "extra.h"
+
 uint16_t stop = 0;
+
 void PWMInitialize(){
 
 	SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK;		// Clock on PORTB 
 	SIM->SCGC6 |= SIM_SCGC6_TPM0_MASK;		// Clock on TMP0 module 
 	SIM->SOPT2 |= SIM_SOPT2_TPMSRC(1); 		// TPM Clock source, MCGFLLCLK = 48MHz
 	
-	PORTB->PCR[11] |= PORT_PCR_MUX(2); 		// PTB, pin 11 as buzzer output
+	PORTB->PCR[BUZZER] |= PORT_PCR_MUX(2); 		// PTB, pin 11 as buzzer output
 	TPM0->SC &= ~TPM_SC_CPWMS_MASK;				// Up counting mode
 	TPM0->SC &= ~TPM_SC_CMOD_MASK;				// LPTPM counter is disabled
 	TPM0->SC |= TPM_SC_PS(5); 						// Clock divider, 5 = clk/32
@@ -40,11 +42,18 @@ int startBuzzer(uint16_t pulse){
 	
 	return 0;
 }
-
-void stopBuzzer(void) 
+int stopBuzzer(void) 
 	{
 	TPM0->SC &= ~TPM_SC_CMOD(0); 											
 	TPM0->CONTROLS[0].CnV = TPM_CnV_VAL(stop); 				
 	TPM0->SC |= TPM_SC_CMOD(1); 											
 	
+	return 0;
 	}
+	
+void PWMBuzz()
+{
+	startBuzzer(800);
+	delay_mc(70);
+	stopBuzzer();
+}

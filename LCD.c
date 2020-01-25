@@ -44,46 +44,47 @@
 #define Rw 0b00000010  // Read/Write bit
 #define Rs 0b00000001  // Register select bit
 
-#define LCD 0x3F
-void LCDWrite(uint8_t date, uint8_t type)
-{	
-	uint8_t data2=date;
+#define LCD 0x3F 			 // Constant address of a slave screen device
+
+/*
+Writing single byte of data to LCD screen. 
+*/
+void LCDWrite(uint8_t data, uint8_t type){	
+	uint8_t data2=data;
 	data2 &= 0xF0;
 	I2CWrite(LCD, (data2) | Bl | (type ? Rs : 0) |  En);
 	I2CWrite(LCD, (data2)| Bl | (type ? Rs : 0));
-	I2CWrite(LCD, (date << 4) | Bl | (type ? Rs : 0) |  En);
-	I2CWrite(LCD, (date << 4)| Bl | (type ? Rs : 0));
+	I2CWrite(LCD, (data << 4) | Bl | (type ? Rs : 0) |  En);
+	I2CWrite(LCD, (data << 4)| Bl | (type ? Rs : 0));
 
 }
-
-void LCDFirstRow()
-{
+/*
+Functions to select which row to write into
+*/
+void LCDFirstRow() {
 	LCDWrite(0b10000000,0);
 	delay_mc(1);
 }
-void LCDSecondRow()
-{
+void LCDSecondRow(){
 	LCDWrite(0b11000000,0);
 	delay_mc(1);
 }
-
-
-
-
+// 		2 8-bit packages consist of:
 // 0b	0		0		0		0		0		0		0		0				0b	0		0		0		0		0		0		0		0
 //		DB7	DB6	DB5	DB4	BL	E		R/W	RS					DB3	DB2	DB1	DB0	BL	E		R/W	RS
-void LCDInit() 
-{
-	I2CWrite(0x3F, 0b00000000);
 
-	for (int i = 0; i<419400; i++)
-	{}
-	I2CWrite(0x3F, 0b00000000);	
-	
-	I2CWrite(0x3F, 0b00110100);
-	I2CWrite(0x3F, 0b00110000);
-		
-	for (int i = 0; i<19250; i++)
+void LCDInit() {											//initialization made according to HD44780U datasheet		
+																			//4-bit interface, 2x16, 5x8 DOTS
+	I2CWrite(0x3F, 0b00000000);					//
+																			//All sequences below are necessary to initialize 2x16 LCD screen
+	for (int i = 0; i<419400; i++)			//via I2C communication.
+	{}																	//Derived from datasheet
+	I2CWrite(0x3F, 0b00000000);					//
+																			//DB7-0 - Data bits
+	I2CWrite(0x3F, 0b00110100);					//BL - Blacklight bit. 1 means blacklight is set on.
+	I2CWrite(0x3F, 0b00110000);					//Rs  - Register select bit.
+																			//R/W - Read/Write bit, 0 equals write.
+	for (int i = 0; i<19250; i++)				//E - enable bit, switched from 1 to 0 in each transmission.
 	{}	
 	;
 	I2CWrite(0x3F, 0b00110100);
@@ -101,7 +102,7 @@ void LCDInit()
 	I2CWrite(0x3F, 0b00100100);
 	I2CWrite(0x3F, 0b00100000);
 		
-	I2CWrite(0x3F, 0b00100000);
+
 	I2CWrite(0x3F, 0b00100100);
 	I2CWrite(0x3F, 0b00100000);
 
@@ -143,31 +144,20 @@ void LCDInit()
 	I2CWrite(0x3F, 0b00000100);
 	I2CWrite(0x3F, 0b00000000);
 		
-	for (int i = 0; i<8723; i++)
+	for (int i = 0; i<8723; i++)		//Delaying
 	{}	
 	I2CWrite(0x3F, 0b00001000);			//koniec inicjalizacji
-		
-	LCDWrite(0b00001111, 0);
+	LCDStatic();
 	LCDFirstRow();
-	LCDWrite(0b01000100, Rs);				//d
-	LCDWrite(0b01011001, Rs);				//y
-	LCDWrite(0b01010011, Rs);				//s
-	LCDWrite(0b01010100, Rs);				//t	
-	LCDWrite(0b01000001, Rs);				//a
-	LCDWrite(0b01001110, Rs);				//n
-	LCDWrite(0b01010011, Rs);				//s
-	LCDWrite(0b00111010, Rs);				//:
-	LCDSecondRow();
-		
-	for (int i=0;i<16;i++) {
-		LCDWrite(0b11111111,1);
-		delay_mc(1);
-	}
-	LCDFirstRow();
+	
+	
 	LCDWrite(0b00000000,0);
 	
 }
 
+/*
+Moves coursor into field with x and y coordinates.
+*/
 void LCDGotoXY(uint8_t x, uint8_t y)
 {
 	LCDGoto00();
@@ -180,6 +170,9 @@ void LCDGotoXY(uint8_t x, uint8_t y)
 	}
 }
 
+/*
+Returns coursor to left top corner of LCD.
+*/
 void LCDGoto00()
 {
 	LCDWrite(0b000000010, 0);
@@ -198,14 +191,88 @@ void LCDCoursorLeft()
 	delay_mc(1);
 }
 
+/*
+Clears chosen field of LCD
+*/
 void LCDClearXY(uint8_t x, uint8_t y)
 {
 	LCDGotoXY(x, y);
 	LCDWrite(0b00100000, Rs);
+	delay_mc(1);
 }
 
-void LCDWriteSquare(uint8_t x, uint8_t y)
+/*
+Writes two square bars on LCD into x, y coordinates
+*/
+void LCDWriteTwoSquares(uint8_t x, uint8_t y)
 {
 	LCDGotoXY(x, y);
 	LCDWrite(0b11111111, Rs);
+	LCDWrite(0b11111111, Rs);
+}
+
+
+/*
+CountSquares funcition calculates number of square bars to be shown on screen
+Bars increase with distance and are quanitized in packs of two, meaning 8 possible
+distances to be distinguished by the screen and buzzer.
+*/
+uint8_t LCDCountSquares()
+{
+	delay_mc(20);
+	uint16_t dist = GetDistance();
+	uint8_t bars = 0;
+	if (dist >= 10) {
+		LCDWriteTwoSquares(0, 1);
+		bars++;
+	}
+	if (dist >= 50) {
+		LCDWriteTwoSquares(2, 1);
+		bars++;
+	}
+	if (dist >= 75) {
+		LCDWriteTwoSquares(4, 1);
+		bars++;
+	}
+	if (dist >= 100) {
+		LCDWriteTwoSquares(6, 1);
+		bars++;
+	}
+	if (dist >= 125) {
+		LCDWriteTwoSquares(8, 1);
+		bars++;
+	}
+	if (dist >= 150) {
+		LCDWriteTwoSquares(10, 1);
+		bars++;
+	}
+	if (dist >= 175) {
+		LCDWriteTwoSquares(12, 1);
+		bars++;
+	}
+	if (dist >= 200) {
+		LCDWriteTwoSquares(14, 1);
+		bars++;
+	}
+	bars *= 2;
+	for(int i = bars; i <= 16; i++)
+	{
+		LCDClearXY(i, 1);
+		delay_mc(2);
+	}
+return bars;
+}
+
+/*
+Function to display static text
+*/
+void LCDStatic(){
+	LCDWrite(0b01000100, Rs);				//d
+	LCDWrite(0b01011001, Rs);				//y
+	LCDWrite(0b01010011, Rs);				//s
+	LCDWrite(0b01010100, Rs);				//t	
+	LCDWrite(0b01000001, Rs);				//a
+	LCDWrite(0b01001110, Rs);				//n
+	LCDWrite(0b01010011, Rs);				//s
+	LCDWrite(0b00111010, Rs);				//:
 }

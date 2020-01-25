@@ -1,4 +1,11 @@
+#ifndef I2C_h
+#define I2C_h
+
 #include "mkl05z4.h"
+
+#define SCL 3
+#define SDA 4
+
 #define I2C_M_START I2C0->C1 |= I2C_C1_MST_MASK
 #define I2C_M_STOP I2C0->C1 &= ~I2C_C1_MST_MASK
 #define I2C_M_RSTART I2C0->C1 |= I2C_C1_RSTA_MASK
@@ -11,5 +18,7 @@
 #define ACK I2C0->C1 &= ~I2C_C1_TXAK_MASK
 
 
-void I2CInit (void);
+void I2CInit(void);
 void I2CWrite(uint8_t address, uint8_t data);
+	
+#endif
