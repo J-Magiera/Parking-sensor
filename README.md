@@ -50,9 +50,10 @@ Parking sensor project for FRDM KL05Z development board. FRDM KL05Z inbuilt I2C 
 HC-SR04 is an ultrasonic rangefinder, made by [Cytron Technologies](https://www.cytron.io/).
 2x16 LCD is used to display current distance (between 2 and 20 m) between object and rangefinder, sound feedback is provided with a buzzer.
 Build by: 
-*[Jan Magiera](https://github.com/J-Magiera)
 
-*[Szymon Adamus](https://github.com/walitor)
+[Jan Magiera](https://github.com/J-Magiera)
+
+[Szymon Adamus](https://github.com/walitor)
 
 
 
